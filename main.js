@@ -41,12 +41,16 @@ class ThingCard extends Component {
     this.startY = y;
     this.tempX = 0;
     this.tempY = 0;
-    document.addEventListener('mousemove', this.handleMove);
+    document.addEventListener('mousemove', this.handleMove, {
+      passive: true,
+    });
     document.addEventListener('mouseup', this.handleUp);
+    document.addEventListener('touchmove', this.handleMove, {
+      passive: true,
+    });
+    document.addEventListener('touchend', this.handleUp);
   }
   handleMove(evt) {
-    evt.preventDefault();
-
     const { x, y } = xy(evt);
     this.tempX = x - this.startX;
     this.tempY = y - this.startY;
@@ -68,6 +72,8 @@ class ThingCard extends Component {
 
     document.removeEventListener('mousemove', this.handleMove);
     document.removeEventListener('mouseup', this.handleUp);
+    document.removeEventListener('touchmove', this.handleMove);
+    document.removeEventListener('touchend', this.handleUp);
   }
   compose({ value, x, y }) {
     return jdom`<div class="tb-thing ${this.active ? 'active' : 'inactive'}"
@@ -86,14 +92,15 @@ class ThingCard extends Component {
           onclick=${this.remover}>del</button>
         <button class="tb-button movable paper"
           onclick=${() => {
-            const ta = this.node.querySelector('textarea');
-            ta.style.height = '12em';
-            ta.style.width = '16em';
-          }}>rst</button>
+        const ta = this.node.querySelector('textarea');
+        ta.style.height = '12em';
+        ta.style.width = '16em';
+      }}>rst</button>
       </div>
       <textarea class="tb-textarea paper paper-border-top"
         value=${value}
         onmousedown=${this.handleDown}
+        ontouchstart=${this.handleDown}
         onfocus=${() => {
         this.active = true;
         this.render({ value, x, y });
@@ -129,7 +136,7 @@ class Board extends Component {
 
     this.ctrlDown = false;
     this.handleKeydown = this.handleKeydown.bind(this);
-    this.handleAdd = this.handleAdd.bind(this);
+    this.handleDown = this.handleDown.bind(this);
 
     this.bind(this.things, () => this.render());
 
@@ -167,19 +174,36 @@ class Board extends Component {
     }
     window.addEventListener('keyup', up);
   }
-  handleAdd(evt) {
+  handleDown(evt) {
     if (evt.target !== this.node) {
       return;
     }
+    evt.preventDefault();
 
-    this.things.create({
-      ...xy(evt),
-      value: 'new.',
-    });
+    const up = fvt => {
+      fvt.preventDefault();
+
+      const a = xy(evt);
+      const b = xy(fvt);
+      const closeEnough = (n, m) => Math.abs(n - m) < 2;
+
+      if (closeEnough(a.x, a.x) && closeEnough(a.y, b.y)
+        && fvt.target === this.node) {
+        this.things.create({
+          ...a,
+          value: 'new.',
+        });
+      }
+      this.node.removeEventListener('mouseup', up);
+      this.node.removeEventListener('touchend', up);
+    }
+    this.node.addEventListener('mouseup', up);
+    this.node.addEventListener('touchend', up);
   }
   compose() {
     return jdom`<div class="tb-board ${this.ctrlDown ? 'ctrlDown' : ''}"
-      onclick=${this.handleAdd}>
+      onmousedown=${this.handleDown}
+      ontouchstart=${this.handleDown}>
       <header class="tb-header accent paper">
         <div class="left">
           <span class="title">thingboard</span>
@@ -190,15 +214,15 @@ class Board extends Component {
             onclick=${() => this.things.reset()}>clr</button>
           <button class="tb-button movable paper"
             onclick=${() => {
-              let i = 1;
-              for (const thing of this.things) {
-                thing.update({
-                  x: i * 10,
-                  y: i * 10, 
-                });
-                i++;
-              }
-            }}>rst</button>
+        let i = 1;
+        for (const thing of this.things) {
+          thing.update({
+            x: i * 10,
+            y: i * 10,
+          });
+          i++;
+        }
+      }}>rst</button>
         </div>
       </header>
       ${this.thingList.node}
