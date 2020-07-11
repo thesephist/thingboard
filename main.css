@@ -90,7 +90,7 @@ body {
   left: 0;
 }
 
-.tb-board.ctrlDown .tb-thing {
+.tb-board.ctrlDown .tb-textarea {
   cursor: move;
   opacity: .5;
 }

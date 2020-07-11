@@ -1,4 +1,4 @@
-## thingboard 🖼️
+# thingboard 🖼️
 
 **Thingboard** is just a simple **board** for writing **things** down. Frequently when I'm working, I find myself looking for places to jot stuff down to help me think and organize, but I don't want to be shuffling pieces of paper around, and it's nice to be able to copy-paste notes from other tools I use. Thingboard fulfills this need for me by being a board for Post-it style notes I can move and resize. It saves data to your browser's local storage.
 
