@@ -1,7 +1,7 @@
 html,
 body {
   font-family: 'Barlow', system-ui, sans-serif;
-  --paper-accent: #cf3868;
+  --paper-accent: #3aa784;
   background: #f8f8f8;
 }
 
@@ -21,6 +21,7 @@ body {
   font-weight: bold;
   font-size: 1.2em;
   line-height: 1.5em;
+  margin-right: .5em;
 }
 
 .tb-textarea {
@@ -82,4 +83,14 @@ body {
 .tb-board.ctrlDown .tb-thing {
   cursor: move;
   opacity: .5;
+}
+
+.tb-slate {
+  color: #888;
+  font-size: 1.2em;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
 }

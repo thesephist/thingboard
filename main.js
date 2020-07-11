@@ -8,6 +8,16 @@ const {
 class Thing extends Record { }
 class ThingStore extends StoreOf(Thing) { }
 
+const debounce = (fn, delay) => {
+  let to = null;
+  return (...args) => {
+    const bfn = () => fn(...args);
+    clearTimeout(to);
+    to = setTimeout(bfn, delay);
+  }
+}
+
+
 function xy(evt) {
   const x = evt.clientX || (evt.touches && evt.touches[0].clientX);
   const y = evt.clientY || (evt.touches && evt.touches[0].clientY);
@@ -99,6 +109,7 @@ class ThingCard extends Component {
       </div>
       <textarea class="tb-textarea paper paper-border-top"
         value=${value}
+        placeholder="say something..."
         onmousedown=${this.handleDown}
         ontouchstart=${this.handleDown}
         onfocus=${() => {
@@ -135,15 +146,25 @@ class Board extends Component {
     this.restore();
 
     this.ctrlDown = false;
+    this.toast = '';
     this.handleKeydown = this.handleKeydown.bind(this);
     this.handleDown = this.handleDown.bind(this);
+    this.save = debounce(this.save.bind(this), 500);
 
+    this.things.addHandler(this.save);
     this.bind(this.things, () => this.render());
 
     window.addEventListener('keydown', this.handleKeydown);
   }
   save() {
     localStorage.setItem('thingboard', JSON.stringify(this.things.serialize()));
+
+    this.toast = 'saved.';
+    this.render();
+    setTimeout(() => {
+      this.toast = '';
+      this.render();
+    }, 1200);
   }
   restore() {
     try {
@@ -189,10 +210,11 @@ class Board extends Component {
 
       if (closeEnough(a.x, a.x) && closeEnough(a.y, b.y)
         && fvt.target === this.node) {
-        this.things.create({
+        const thing = this.things.create({
           ...a,
-          value: 'new.',
+          value: '',
         });
+        thing.addHandler(this.save);
       }
       this.node.removeEventListener('mouseup', up);
       this.node.removeEventListener('touchend', up);
@@ -208,6 +230,7 @@ class Board extends Component {
         <div class="left">
           <span class="title">thingboard</span>
           (${this.things.records.size})
+          ${this.toast}
         </div>
         <div class="right">
           <button class="tb-button movable paper"
@@ -226,6 +249,7 @@ class Board extends Component {
         </div>
       </header>
       ${this.thingList.node}
+      ${this.things.records.size ? this.thingList.node : jdom`<div class="tb-slate">Tap to create a thing.</div>`}
     </div>`;
   }
 }
