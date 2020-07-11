@@ -1,0 +1,85 @@
+html,
+body {
+  font-family: 'Barlow', system-ui, sans-serif;
+  --paper-accent: #cf3868;
+  background: #f8f8f8;
+}
+
+.tb-header {
+  justify-content: space-between;
+}
+
+.tb-header,
+.left,
+.right {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.title {
+  font-weight: bold;
+  font-size: 1.2em;
+  line-height: 1.5em;
+}
+
+.tb-textarea {
+  resize: auto;
+  height: 12em;
+  width: 16em;
+  -webkit-appearance: none;
+  background: #fff;
+  font-family: 'Barlow', system-ui, sans-serif;
+  line-height: 1.5em;
+  font-size: 1em;
+}
+
+.tb-thing {
+  position: absolute;
+  top: 0;
+  left: 0;
+  overflow: visible;
+  height: 0;
+  width: 0;
+  transition: opacity .15s;
+}
+
+.tb-buttons {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  position: absolute;
+  bottom: .6em;
+  left: 0;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity .15s;
+}
+
+.tb-thing:focus-within .tb-buttons,
+.tb-thing.active .tb-buttons {
+  opacity: 1;
+  pointer-events: all;
+}
+
+.tb-button {
+  margin-right: .6em;
+}
+
+.tb-board {
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+}
+
+.tb-board,
+.tb-things {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.tb-board.ctrlDown .tb-thing {
+  cursor: move;
+  opacity: .5;
+}
