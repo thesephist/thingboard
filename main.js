@@ -70,7 +70,7 @@ class ThingCard extends Component {
     });
   }
   handleDown(evt) {
-    if (!evt.ctrlKey) return;
+    if (!evt.ctrlKey && !evt.metaKey) return;
 
     evt.preventDefault();
 
@@ -145,6 +145,14 @@ class ThingCard extends Component {
         placeholder="say something..."
         onmousedown=${this.handleDown}
         ontouchstart=${this.handleDown}
+        onmouseup=${(evt) => {
+        // on Safari/Webkit, MutationObserver doesn't detect
+        // textarea size changes. So this is a nice surrogate.
+        const { width, height } = evt.target.getBoundingClientRect();
+        if (width !== this.record.get('width') || height !== this.record.get('height')) {
+          this.record.update({ width, height });
+        }
+      }}
         onfocus=${() => {
         this.active = true;
         this.render(data);
@@ -220,13 +228,13 @@ class Board extends Component {
     }
   }
   handleKeydown(evt) {
-    if (evt.key === 'Control') {
+    if (evt.key === 'Control' || evt.key === 'Meta') {
       this.ctrlDown = true;
     }
     this.render();
 
     const up = evt => {
-      if (evt.key === 'Control') {
+      if (evt.key === 'Control' || evt.key === 'Meta') {
         this.ctrlDown = false;
         window.removeEventListener('keyup', up);
         this.render();
@@ -294,7 +302,7 @@ class Board extends Component {
       ${this.things.records.size ? this.thingList.node : (
         jdom`<div class="tb-slate">
           Tap to create a thing. <br/>
-          Ctrl + drag to move things.
+          Ctrl/Cmd + drag to move things.
         </div>`
       )}
     </div>`;

@@ -32,8 +32,8 @@ body {
 
 .tb-textarea {
   resize: auto;
-  height: 200px;
-  width: 300px;
+  min-width: 0;
+  min-height: 0;
   -webkit-appearance: none;
   background: #fff;
   line-height: 1.5em;
@@ -90,9 +90,12 @@ body {
   left: 0;
 }
 
+.tb-board.ctrlDown .tb-thing {
+  opacity: .5;
+}
+
 .tb-board.ctrlDown .tb-textarea {
   cursor: move;
-  opacity: .5;
 }
 
 .tb-slate {
