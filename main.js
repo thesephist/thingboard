@@ -17,11 +17,19 @@ const debounce = (fn, delay) => {
   }
 }
 
-
 function xy(evt) {
-  const x = evt.clientX || (evt.touches && evt.touches[0].clientX);
-  const y = evt.clientY || (evt.touches && evt.touches[0].clientY);
-  return { x, y }
+  let event = evt;
+  if (!evt.clientX) {
+    if (evt.touches && evt.touches.length) {
+      event = evt.touches[0];
+    } else if (evt.changedTouches && evt.changedTouches.length) {
+      event = evt.changedTouches[0];
+    }
+  }
+  return {
+    x: event.clientX,
+    y: event.clientY,
+  }
 }
 
 class ThingCard extends Component {
@@ -50,8 +58,7 @@ class ThingCard extends Component {
           continue;
         }
 
-        const width = parseFloat(mutation.target.style.width);
-        const height = parseFloat(mutation.target.style.height);
+        const {width, height} = mutation.target.getBoundingClientRect();
         setDimensions(width, height);
       }
     });
@@ -118,15 +125,16 @@ class ThingCard extends Component {
           width: t.width,
           height: t.height,
         })
-      }}>cln</button>
+      }}>clone</button>
         <button class="tb-button movable paper"
-          onclick=${this.remover}>del</button>
+          onclick=${this.remover}>delete</button>
         <button class="tb-button movable paper"
           onclick=${() => {
-        const ta = this.node.querySelector('textarea');
-        ta.style.height = '12em';
-        ta.style.width = '16em';
-      }}>rst</button>
+          this.record.update({
+            width: 200,
+            height: 100,
+          });
+      }}>reset</button>
       </div>
       <textarea class="tb-textarea paper paper-border-top"
         style="width:${width}px;height:${height}px"
@@ -184,7 +192,7 @@ class Board extends Component {
   save() {
     localStorage.setItem('thingboard', JSON.stringify(this.things.serialize()));
 
-    this.toast = 'saved.';
+    this.toast = '...saved';
     this.render();
     setTimeout(() => {
       this.toast = '';
@@ -261,7 +269,7 @@ class Board extends Component {
         </div>
         <div class="right">
           <button class="tb-button movable paper"
-            onclick=${() => this.things.reset()}>clr</button>
+            onclick=${() => this.things.reset()}>clear</button>
           <button class="tb-button movable paper"
             onclick=${() => {
         let i = 1;
@@ -272,7 +280,7 @@ class Board extends Component {
           });
           i++;
         }
-      }}>rst</button>
+      }}>stack</button>
         </div>
       </header>
       ${this.thingList.node}
