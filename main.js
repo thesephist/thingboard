@@ -291,7 +291,12 @@ class Board extends Component {
       }}>stack</button>
         </div>
       </header>
-      ${this.things.records.size ? (this.thingList.node) : (jdom`<div class="tb-slate">Tap to create a thing.</div>`)}
+      ${this.things.records.size ? this.thingList.node : (
+        jdom`<div class="tb-slate">
+          Tap to create a thing. <br/>
+          Ctrl + drag to move things.
+        </div>`
+      )}
     </div>`;
   }
 }
