@@ -58,8 +58,11 @@ class ThingCard extends Component {
           continue;
         }
 
-        const {width, height} = mutation.target.getBoundingClientRect();
-        setDimensions(width, height);
+        const { width, height } = mutation.target.getBoundingClientRect();
+        if (width !== this.record.get('width') || height !== this.record.get('height')) {
+          setDimensions(width, height);
+        }
+        return;
       }
     });
     observer.observe(this.node.querySelector('textarea'), {
@@ -124,16 +127,16 @@ class ThingCard extends Component {
           y: t.y + 10,
           width: t.width,
           height: t.height,
-        })
+        });
       }}>clone</button>
         <button class="tb-button movable paper"
           onclick=${this.remover}>delete</button>
         <button class="tb-button movable paper"
           onclick=${() => {
-          this.record.update({
-            width: 200,
-            height: 100,
-          });
+        this.record.update({
+          width: 300,
+          height: 200,
+        });
       }}>reset</button>
       </div>
       <textarea class="tb-textarea paper paper-border-top"
@@ -149,7 +152,10 @@ class ThingCard extends Component {
         onblur=${() => {
         setTimeout(() => {
           this.active = false;
-          this.render(data)
+          if (!this.record) {
+            return;
+          }
+          this.render(this.record.summarize());
         }, 250);
       }}
         oninput=${evt => {
@@ -192,7 +198,7 @@ class Board extends Component {
   save() {
     localStorage.setItem('thingboard', JSON.stringify(this.things.serialize()));
 
-    this.toast = '...saved';
+    this.toast = '...';
     this.render();
     setTimeout(() => {
       this.toast = '';
@@ -261,30 +267,31 @@ class Board extends Component {
     return jdom`<div class="tb-board ${this.ctrlDown ? 'ctrlDown' : ''}"
       onmousedown=${this.handleDown}
       ontouchstart=${this.handleDown}>
-      <header class="tb-header accent paper">
+      <header class="tb-header">
         <div class="left">
           <span class="title">thingboard</span>
-          (${this.things.records.size})
-          ${this.toast}
+          (${this.toast || this.things.records.size})
         </div>
         <div class="right">
+          <a class="tb-button movable paper" target="_blank"
+            href="https://github.com/thesephist/thingboard">about</a>
           <button class="tb-button movable paper"
             onclick=${() => this.things.reset()}>clear</button>
           <button class="tb-button movable paper"
             onclick=${() => {
         let i = 1;
+        const { height } = this.node.querySelector('header').getBoundingClientRect();
         for (const thing of this.things) {
           thing.update({
             x: i * 10,
-            y: i * 10,
+            y: i * 10 + height,
           });
           i++;
         }
       }}>stack</button>
         </div>
       </header>
-      ${this.thingList.node}
-      ${this.things.records.size ? this.thingList.node : jdom`<div class="tb-slate">Tap to create a thing.</div>`}
+      ${this.things.records.size ? (this.thingList.node) : (jdom`<div class="tb-slate">Tap to create a thing.</div>`)}
     </div>`;
   }
 }

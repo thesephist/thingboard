@@ -1,12 +1,18 @@
 html,
 body {
   font-family: 'Barlow', system-ui, sans-serif;
-  --paper-accent: #3aa784;
+  --paper-accent: #ed445b;
   background: #f8f8f8;
+}
+
+.tb-textarea,
+.tb-button {
+  font-family: 'Barlow', system-ui, sans-serif;
 }
 
 .tb-header {
   justify-content: space-between;
+  padding: .5em 1em;
 }
 
 .tb-header,
@@ -30,7 +36,6 @@ body {
   width: 300px;
   -webkit-appearance: none;
   background: #fff;
-  font-family: 'Barlow', system-ui, sans-serif;
   line-height: 1.5em;
   font-size: 1em;
 }
@@ -64,7 +69,12 @@ body {
 }
 
 .tb-button {
-  margin-right: .6em;
+  margin-left: .6em;
+  font-size: .8rem;
+}
+
+.tb-button:first-child {
+  margin-left: 0;
 }
 
 .tb-board {
