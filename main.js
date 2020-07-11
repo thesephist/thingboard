@@ -11,9 +11,9 @@ class ThingStore extends StoreOf(Thing) { }
 const debounce = (fn, delay) => {
   let to = null;
   return (...args) => {
-    const bfn = () => fn(...args);
+    const dfn = () => fn(...args);
     clearTimeout(to);
-    to = setTimeout(bfn, delay);
+    to = setTimeout(dfn, delay);
   }
 }
 
@@ -40,6 +40,24 @@ class ThingCard extends Component {
     this.handleUp = this.handleUp.bind(this);
 
     this.bind(thing, data => this.render(data));
+
+    const setDimensions = debounce((width, height) => {
+      this.record.update({ width, height });
+    }, 500);
+    const observer = new MutationObserver(mutationList => {
+      for (const mutation of mutationList) {
+        if (mutation.type !== 'attributes' || mutation.attributeName !== 'style') {
+          continue;
+        }
+
+        const width = parseFloat(mutation.target.style.width);
+        const height = parseFloat(mutation.target.style.height);
+        setDimensions(width, height);
+      }
+    });
+    observer.observe(this.node.querySelector('textarea'), {
+      attributes: true,
+    });
   }
   handleDown(evt) {
     if (!evt.ctrlKey) return;
@@ -85,7 +103,8 @@ class ThingCard extends Component {
     document.removeEventListener('touchmove', this.handleMove);
     document.removeEventListener('touchend', this.handleUp);
   }
-  compose({ value, x, y }) {
+  compose(data) {
+    const { value, x, y, width, height } = data;
     return jdom`<div class="tb-thing ${this.active ? 'active' : 'inactive'}"
       style="transform: translate(${x + this.tempX}px,${y + this.tempY}px)">
       <div class="tb-buttons">
@@ -96,6 +115,8 @@ class ThingCard extends Component {
           value: t.value,
           x: t.x + 10,
           y: t.y + 10,
+          width: t.width,
+          height: t.height,
         })
       }}>cln</button>
         <button class="tb-button movable paper"
@@ -108,18 +129,19 @@ class ThingCard extends Component {
       }}>rst</button>
       </div>
       <textarea class="tb-textarea paper paper-border-top"
+        style="width:${width}px;height:${height}px"
         value=${value}
         placeholder="say something..."
         onmousedown=${this.handleDown}
         ontouchstart=${this.handleDown}
         onfocus=${() => {
         this.active = true;
-        this.render({ value, x, y });
+        this.render(data);
       }}
         onblur=${() => {
         setTimeout(() => {
           this.active = false;
-          this.render({ value, x, y })
+          this.render(data)
         }, 250);
       }}
         oninput=${evt => {
@@ -152,6 +174,9 @@ class Board extends Component {
     this.save = debounce(this.save.bind(this), 500);
 
     this.things.addHandler(this.save);
+    for (const thing of this.things) {
+      thing.addHandler(this.save);
+    }
     this.bind(this.things, () => this.render());
 
     window.addEventListener('keydown', this.handleKeydown);
@@ -212,6 +237,8 @@ class Board extends Component {
         && fvt.target === this.node) {
         const thing = this.things.create({
           ...a,
+          width: 300,
+          height: 200,
           value: '',
         });
         thing.addHandler(this.save);

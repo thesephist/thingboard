@@ -26,8 +26,8 @@ body {
 
 .tb-textarea {
   resize: auto;
-  height: 12em;
-  width: 16em;
+  height: 200px;
+  width: 300px;
   -webkit-appearance: none;
   background: #fff;
   font-family: 'Barlow', system-ui, sans-serif;
